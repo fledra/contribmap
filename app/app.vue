@@ -1,6 +1,13 @@
 <template>
   <NuxtRouteAnnouncer />
+
   <UApp>
-    hello world!
+    <Header />
+
+    <UMain>
+      <UContainer>
+        hello world!
+      </UContainer>
+    </UMain>
   </UApp>
 </template>
