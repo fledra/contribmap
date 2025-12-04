@@ -1,0 +1,41 @@
+{
+  "name": "contribmap",
+  "description": "Merge contribution heatmaps from multiple software forges",
+  "version": "0.0.1",
+  "license": "AGPL-3.0-or-later",
+  "private": true,
+  "type": "module",
+  "author": "Baran D. <baran@fledra.dev> (https://fledra.dev)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fledra/contribmap.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fledra/contribmap/issues"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix ."
+  },
+  "dependencies": {
+    "@nuxt/ui": "4.2.1",
+    "nuxt": "^4.2.1",
+    "vue": "^3.5.25",
+    "vue-router": "^4.6.3"
+  },
+  "devDependencies": {
+    "@fledra/eslint-config": "^2.4.0",
+    "@iconify-json/lucide": "^1.2.78",
+    "@nuxt/eslint": "1.11.0",
+    "eslint": "^9.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "typescript": "^5.6.3"
+  }
+}
