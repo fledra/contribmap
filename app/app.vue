@@ -6,7 +6,7 @@
 
     <UMain>
       <UContainer>
-        hello world!
+        <Forge />
       </UContainer>
     </UMain>
   </UApp>
