@@ -34,6 +34,8 @@
         </template>
       </UInput>
     </UFormField>
+
+    <Heatmap />
   </div>
 </template>
 
