@@ -27,7 +27,8 @@
     "@nuxt/ui": "4.2.1",
     "nuxt": "^4.2.1",
     "vue": "^3.5.25",
-    "vue-router": "^4.6.3"
+    "vue-router": "^4.6.3",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@fledra/eslint-config": "^2.4.0",
