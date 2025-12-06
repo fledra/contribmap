@@ -4,7 +4,6 @@
       :state="formData"
       :schema="forgeSchema"
       class="flex gap-4 flex-col"
-      loading-auto
     >
       <div class="flex flex-col gap-4 grow w-full md:w-60">
         <UFormField label="Forge" name="forge" required>
@@ -81,7 +80,10 @@ const forgeSchema = z.object({
     .transform((v) => `https://${v}`)
     .pipe(z.httpUrl({ normalize: true, error: 'Please enter a valid forge URL' }))
     .optional(),
-  user: z.string({ error: 'Please enter your username' }),
+  user: z
+    .string()
+    .trim()
+    .min(1, 'Please enter your username'),
 }).superRefine((data, ctx) => {
   if (requiresEndpoint.includes(data.forge) && !data.endpoint) {
     ctx.addIssue({
@@ -97,7 +99,7 @@ export type ForgeSchema = z.infer<typeof forgeSchema>;
 const formData = reactive<Partial<ForgeSchema>>({
   forge: undefined,
   endpoint: undefined,
-  user: undefined,
+  user: '',
 });
 
 const selectedIcon = computed(() => forges.find((f) => f.value === formData.forge)?.icon);
