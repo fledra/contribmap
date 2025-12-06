@@ -1,21 +1,19 @@
 <template>
-  <div class="w-full h-full">
-    <svg width="100%" height="100%" :viewBox="`0 0 ${width} ${height}`" preserveAspectRatio="xMidYMid meet">
-      <g>
-        <rect
-          v-for="(_, i) in daysInYear"
-          :key="i"
-          :x="getX(i)"
-          :y="getY(i)"
-          :width="boxSize"
-          :height="boxSize"
-          :rx="boxRadius"
-          :ry="boxRadius"
-          :fill="getColor(i)"
-        />
-      </g>
-    </svg>
-  </div>
+  <svg width="100%" height="100%" :viewBox="`0 0 ${width} ${height}`" preserveAspectRatio="xMidYMid meet">
+    <g>
+      <rect
+        v-for="(_, i) in daysInYear"
+        :key="i"
+        :x="getX(i)"
+        :y="getY(i)"
+        :width="boxSize"
+        :height="boxSize"
+        :rx="boxRadius"
+        :ry="boxRadius"
+        :fill="getColor(i)"
+      />
+    </g>
+  </svg>
 </template>
 
 <script setup lang="ts">
