@@ -1,7 +1,5 @@
-import { DAYS_IN_WEEK, MS_DAY } from './constants';
-
 function getDateRange(from: number, to: number) {
-  const daysBetween = (to - from) / MS_DAY;
+  const daysBetween = Math.round((to - from) / MS_DAY);
 
   return {
     from,
@@ -11,13 +9,17 @@ function getDateRange(from: number, to: number) {
   };
 }
 
-export function getHeatmapRange(from: number | Date, to: number | Date) {
+export function getHeatmapRange(from: number | Date, to: number | Date, alignSunday = true) {
   let fromDate = new Date(from);
   let toDate = new Date(to);
 
   if (fromDate > toDate) {
     fromDate = new Date(to);
     toDate = new Date(from);
+  }
+
+  if (alignSunday) {
+    fromDate.setDate(fromDate.getDate() - fromDate.getDay());
   }
 
   fromDate.setHours(0, 0, 0, 0);

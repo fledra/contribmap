@@ -30,6 +30,29 @@ export default defineComponent({
     const gridHeight = computed(() => (props.cellSize * DAYS_IN_WEEK) + (props.cellGap * (DAYS_IN_WEEK - 1)));
     const viewBox = computed(() => `0 0 ${gridWidth.value + labelGutter.value} ${gridHeight.value}`);
 
+    const monthLabels = computed(() => {
+      const labels: Array<[string, number]> = [];
+
+      const from = new Date(range.value.from);
+      const to = new Date(range.value.to);
+      const firstDay = new Date(from.getFullYear(), from.getMonth(), from.getDate() - from.getDay());
+      let cursor = new Date(from.getFullYear(), from.getMonth(), 1);
+
+      while (cursor <= to) {
+        const firstDayOfMonth = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
+        const weekIndex = Math.floor(getDaysBetween(firstDayOfMonth, firstDay) / DAYS_IN_WEEK);
+        const month = monthNames[firstDayOfMonth.getMonth()];
+
+        if (month && weekIndex >= 0 && weekIndex <= range.value.weeksBetween) {
+          labels.push([month, weekIndex]);
+        }
+
+        cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+      }
+
+      return labels;
+    });
+
     function getCellX(index: number) {
       const col = Math.floor(index / DAYS_IN_WEEK);
       return col * (props.cellSize + props.cellGap) + labelGutter.value;
@@ -37,22 +60,30 @@ export default defineComponent({
 
     function getCellY(index: number) {
       const row = index % DAYS_IN_WEEK;
-      return row * (props.cellSize + props.cellGap);
-    }
-
-    function getColor(index: number) {
-      return `oklch(0.7 0.13 ${index})`;
+      return row * (props.cellSize + props.cellGap) + labelFontSize.value * 0.5;
     }
 
     function getDayLabelProps(index: number): VNodeProps & SVGAttributes {
       const row = index * 2 + 1;
-
       return {
         'key': `${props.forge}-day-${index}`,
         'x': labelGutter.value - maxLabelLength,
-        'y': row * (props.cellSize + props.cellGap) + labelFontSize.value,
+        'y': row * (props.cellSize + props.cellGap) + labelFontSize.value * 1.5,
         'text-anchor': 'end',
       };
+    }
+
+    function getMonthLabelProps(weekIndex: number): VNodeProps & SVGAttributes {
+      const col = weekIndex + 1;
+      return {
+        key: `${props.forge}-month-${weekIndex}`,
+        x: labelGutter.value + col * (props.cellSize + props.cellGap),
+        y: 0,
+      };
+    }
+
+    function getCellColor(index: number) {
+      return `oklch(0.7 0.13 ${index})`;
     }
 
     return () => h(
@@ -70,7 +101,7 @@ export default defineComponent({
             key: `${props.forge}-cell-${i}`,
             x: getCellX(i),
             y: getCellY(i),
-            fill: getColor(i),
+            fill: getCellColor(i),
             rx: props.cellRadius,
             ry: props.cellRadius,
             width: props.cellSize,
@@ -81,6 +112,7 @@ export default defineComponent({
         // Labels
         h('g', { style: labelStyles.value }, [
           dayNames.map((day, i) => h('text', getDayLabelProps(i), day)),
+          monthLabels.value.map(([month, i]) => h('text', getMonthLabelProps(i), month)),
         ]),
       ],
     );
