@@ -1,62 +1,40 @@
-interface DateRange {
-  start: number;
-  end: number;
-  daysBetween: number;
-  weeksBetween: number;
-}
+import { DAYS_IN_WEEK, MS_DAY } from './constants';
 
-export interface HeatmapRange {
-  local: DateRange;
-  utc: DateRange;
-}
-
-const MS_DAY = 24 * 60 * 60 * 1000;
-
-function getLastSunday(fromDate: Date, useUTC = false): Date {
-  const date = new Date(fromDate);
-
-  if (useUTC) {
-    date.setUTCDate(date.getUTCDate() - date.getUTCDay());
-    date.setUTCHours(0, 0, 0, 0);
-  } else {
-    date.setDate(date.getDate() - date.getDay());
-    date.setHours(0, 0, 0, 0);
-  }
-
-  return date;
-}
-
-function getDateRange(start: number, end: number): DateRange {
-  const daysBetween = (end - start) / MS_DAY;
+function getDateRange(from: number, to: number) {
+  const daysBetween = (to - from) / MS_DAY;
 
   return {
-    start,
-    end,
+    from,
+    to,
     daysBetween,
-    weeksBetween: daysBetween / 7,
+    weeksBetween: Math.ceil(daysBetween / DAYS_IN_WEEK),
   };
 }
 
-export function getHeatmapRange(rangeStart = new Date()): HeatmapRange {
-  const localNow = new Date(rangeStart);
-  localNow.setHours(0, 0, 0, 0);
+export function getHeatmapRange(from: number | Date, to: number | Date) {
+  let fromDate = new Date(from);
+  let toDate = new Date(to);
 
-  const [localYear, localMonth, localDate] = [localNow.getFullYear(), localNow.getMonth(), localNow.getDate()];
-  const [utcYear, utcMonth, utcDate] = [localNow.getUTCFullYear(), localNow.getUTCMonth(), localNow.getUTCDate()];
+  if (fromDate > toDate) {
+    fromDate = new Date(to);
+    toDate = new Date(from);
+  }
 
-  const localStart = getLastSunday(new Date(localYear - 1, localMonth, localDate));
-  const utcStart = getLastSunday(new Date(Date.UTC(utcYear - 1, utcMonth, utcDate)), true);
+  fromDate.setHours(0, 0, 0, 0);
+  toDate.setHours(0, 0, 0, 0);
 
-  const utcNow = new Date(Date.UTC(utcYear, utcMonth, utcDate));
+  const localRange = getDateRange(
+    fromDate.getTime(),
+    toDate.getTime() + MS_DAY, // current day inclusive
+  );
+
+  const utcRange = getDateRange(
+    Date.UTC(fromDate.getUTCFullYear(), fromDate.getUTCMonth(), fromDate.getUTCDate()),
+    Date.UTC(toDate.getUTCFullYear(), toDate.getUTCMonth(), toDate.getUTCDate()) + MS_DAY, // current day inclusive
+  );
 
   return {
-    local: getDateRange(
-      localStart.getTime(),
-      localNow.getTime() + MS_DAY, // current day inclusive
-    ),
-    utc: getDateRange(
-      utcStart.getTime(),
-      utcNow.getTime() + MS_DAY, // current day inclusive
-    ),
+    localTime: localRange,
+    utc: utcRange,
   };
 }

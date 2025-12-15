@@ -55,7 +55,7 @@
       </UButton>
     </UForm>
 
-    <Heatmap />
+    <Heatmap class="w-full h-full" />
   </div>
 </template>
 
