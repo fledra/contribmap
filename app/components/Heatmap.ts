@@ -13,6 +13,7 @@ export default defineComponent({
     cellSize: { type: Number, default: 10 },
     cellGap: { type: Number, default: 2 },
     cellRadius: { type: Number, default: 2 },
+    labelColor: { type: String, default: 'oklch(92.2% 0 0)' },
   },
   setup(props) {
     const toDate = computed(() => new Date(props.to));
@@ -24,6 +25,7 @@ export default defineComponent({
     const labelStyles = computed<SVGAttributes['style']>(() => ({
       fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif',
       fontSize: labelFontSize.value,
+      fill: props.labelColor,
     }));
 
     const gridWidth = computed(() => (props.cellSize * range.value.weeksBetween) + (props.cellGap * (range.value.weeksBetween - 1)));
