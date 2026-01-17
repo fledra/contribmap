@@ -8,5 +8,18 @@
   "tailwindCSS.classAttributes": ["class", "ui"],
   "tailwindCSS.experimental.classRegex": [
     ["ui:\\s*{([^)]*)\\s*}", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
-  ]
+  ],
+  "json.schemas": [{
+    "fileMatch": [
+      ".contribmaprc",
+      "contribmap.config.json"
+    ],
+    "url": "./public/schema.json"
+  }],
+  "yaml.schemas": {
+    "public/schema.json": [
+      "contribmap.config.yaml",
+      "contribmap.config.yml"
+    ]
+  }
 }

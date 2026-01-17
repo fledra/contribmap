@@ -17,6 +17,12 @@ export default defineNuxtConfig({
       ],
     },
   },
+  watch: [
+    '../.contribmaprc',
+    '../contribmap.config.json',
+    '../contribmap.config.yaml',
+    '../contribmap.config.yml',
+  ],
   modules: ['@nuxt/eslint', '@nuxt/ui'],
   css: ['~/assets/styles/main.css'],
   eslint: {
