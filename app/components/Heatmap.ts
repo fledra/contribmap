@@ -9,7 +9,7 @@ const CHAR_WIDTH_RATIO = 0.65;
 export default defineComponent({
   name: 'Heatmap',
   props: {
-    forge: { type: String, default: '' },
+    heatmap: { type: Object as PropType<HeatmapData> },
     from: { type: [Date, Number] },
     to: { type: [Date, Number], default: Date.now() },
     cellSize: { type: Number, default: 10 },
@@ -75,7 +75,7 @@ export default defineComponent({
       const rowY = getCellY(row);
 
       return {
-        'key': `${props.forge}-day-${index}`,
+        'key': `day-${index}`,
         'x': yAxisGutter.value - props.labelMargin,
         'y': rowY + props.cellSize / 2,
         'text-anchor': 'end',
@@ -87,7 +87,7 @@ export default defineComponent({
       const colX = getCellX((weekIndex + 1) * DAYS_PER_WEEK);
 
       return {
-        'key': `${props.forge}-month-${weekIndex}`,
+        'key': `month-${weekIndex}`,
         'x': colX - props.cellGap / 2,
         'y': props.labelMargin,
         'dominant-baseline': 'hanging',
@@ -110,7 +110,7 @@ export default defineComponent({
         h('g', Array.from(
           { length: range.value.daysBetween },
           (_, i) => h('rect', {
-            key: `${props.forge}-cell-${i}`,
+            key: `cell-${i}`,
             x: getCellX(i),
             y: getCellY(i),
             fill: getCellColor(i),
