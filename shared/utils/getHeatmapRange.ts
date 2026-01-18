@@ -1,11 +1,13 @@
+import { DAYS_PER_WEEK, MS_PER_DAY } from './constants';
+
 function getDateRange(from: number, to: number) {
-  const daysBetween = Math.round((to - from) / MS_DAY);
+  const daysBetween = Math.round((to - from) / MS_PER_DAY);
 
   return {
     from,
     to,
     daysBetween,
-    weeksBetween: Math.ceil(daysBetween / DAYS_IN_WEEK),
+    weeksBetween: Math.ceil(daysBetween / DAYS_PER_WEEK),
   };
 }
 
@@ -27,12 +29,12 @@ export function getHeatmapRange(from: number | Date, to: number | Date, alignSun
 
   const localRange = getDateRange(
     fromDate.getTime(),
-    toDate.getTime() + MS_DAY, // current day inclusive
+    toDate.getTime() + MS_PER_DAY, // current day inclusive
   );
 
   const utcRange = getDateRange(
     Date.UTC(fromDate.getUTCFullYear(), fromDate.getUTCMonth(), fromDate.getUTCDate()),
-    Date.UTC(toDate.getUTCFullYear(), toDate.getUTCMonth(), toDate.getUTCDate()) + MS_DAY, // current day inclusive
+    Date.UTC(toDate.getUTCFullYear(), toDate.getUTCMonth(), toDate.getUTCDate()) + MS_PER_DAY, // current day inclusive
   );
 
   return {

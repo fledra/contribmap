@@ -21,14 +21,14 @@ export default defineComponent({
   },
   setup(props) {
     const toDate = computed(() => new Date(props.to));
-    const fromDate = computed(() => props.from ? new Date(props.from) : new Date(toDate.value.getFullYear() - 1, toDate.value.getMonth(), toDate.value.getDate()));
+    const fromDate = computed(() => props.from ? new Date(props.from) : new Date(toDate.value.getFullYear(), toDate.value.getMonth(), toDate.value.getDate() - DAYS_PER_YEAR));
     const range = computed(() => getHeatmapRange(fromDate.value, toDate.value).localTime);
 
     const xAxisGutter = computed(() => props.labelFontSize + props.labelMargin * 2);
     const yAxisGutter = computed(() => props.labelMargin + maxDayNameLength * props.labelFontSize * CHAR_WIDTH_RATIO);
 
     const gridWidth = computed(() => (props.cellSize * range.value.weeksBetween) + (props.cellGap * (range.value.weeksBetween - 1)));
-    const gridHeight = computed(() => (props.cellSize * DAYS_IN_WEEK) + (props.cellGap * (DAYS_IN_WEEK - 1)));
+    const gridHeight = computed(() => (props.cellSize * DAYS_PER_WEEK) + (props.cellGap * (DAYS_PER_WEEK - 1)));
     const viewBox = computed(() => `0 0 ${gridWidth.value + yAxisGutter.value} ${gridHeight.value + xAxisGutter.value}`);
 
     const labelStyles = computed<SVGAttributes['style']>(() => ({
@@ -47,7 +47,7 @@ export default defineComponent({
 
       while (cursor <= to) {
         const firstDayOfMonth = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
-        const weekIndex = Math.floor(getDaysBetween(firstDayOfMonth, firstDay) / DAYS_IN_WEEK);
+        const weekIndex = Math.floor(getDaysBetween(firstDayOfMonth, firstDay) / DAYS_PER_WEEK);
         const month = monthNames[firstDayOfMonth.getMonth()];
 
         if (month && weekIndex >= 0 && weekIndex <= range.value.weeksBetween) {
@@ -61,12 +61,12 @@ export default defineComponent({
     });
 
     function getCellX(index: number) {
-      const col = Math.floor(index / DAYS_IN_WEEK);
+      const col = Math.floor(index / DAYS_PER_WEEK);
       return col * (props.cellSize + props.cellGap) + yAxisGutter.value;
     }
 
     function getCellY(index: number) {
-      const row = index % DAYS_IN_WEEK;
+      const row = index % DAYS_PER_WEEK;
       return row * (props.cellSize + props.cellGap) + xAxisGutter.value;
     }
 
@@ -84,7 +84,7 @@ export default defineComponent({
     }
 
     function getMonthLabelProps(weekIndex: number): VNodeProps & SVGAttributes {
-      const colX = getCellX((weekIndex + 1) * DAYS_IN_WEEK);
+      const colX = getCellX((weekIndex + 1) * DAYS_PER_WEEK);
 
       return {
         'key': `${props.forge}-month-${weekIndex}`,
