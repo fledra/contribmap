@@ -19,12 +19,13 @@ export default defineComponent({
   setup(props) {
     const range = computed(() => getHeatmapRange(props.from, props.to).localTime);
 
-    const dayLabelGutter = computed(() => props.labelSize * 2.8);
-    const monthLabelGutter = computed(() => props.labelSize * 1.5);
+    const dayLabelGutter = computed(() => props.labelSize * 2.8 + props.labelMargin);
+    const monthLabelGutter = computed(() => props.labelSize * 1.5 + props.labelMargin);
+    const legendGutter = computed(() => props.heatmap ? monthLabelGutter.value + props.labelMargin * 1.5 : 0);
 
     const gridWidth = computed(() => (range.value.weeksBetween * (props.cellSize + props.cellGap)) - props.cellGap);
     const gridHeight = computed(() => (DAYS_PER_WEEK * (props.cellSize + props.cellGap)) - props.cellGap);
-    const viewBox = computed(() => `0 0 ${gridWidth.value + dayLabelGutter.value} ${gridHeight.value + monthLabelGutter.value}`);
+    const viewBox = computed(() => `0 0 ${gridWidth.value + dayLabelGutter.value} ${gridHeight.value + monthLabelGutter.value + legendGutter.value}`);
 
     const theme = computed(() => getTheme(props.theme));
     const themeLevelThresholds = computed(() => {
@@ -127,6 +128,29 @@ export default defineComponent({
       return labels;
     });
 
+    const legendCells = computed(() => {
+      const cells: HeatmapElement[] = [];
+      const levels = Object.keys(theme.value.levels);
+
+      for (let level = 0; level < levels.length; level++) {
+        const color = theme.value.levels[level as ContribmapThemeLevel];
+
+        cells.push({
+          key: `legend-cell-${level}`,
+          x: (level * (props.cellSize + props.cellGap)),
+          rx: props.cellRadius,
+          ry: props.cellRadius,
+          width: props.cellSize,
+          height: props.cellSize,
+          fill: color,
+        });
+      }
+
+      return cells;
+    });
+
+    const legendWidth = computed(() => (legendCells.value.length + 1) * (props.cellSize + props.cellGap));
+
     const classes = computed(() => `
       * {
         font-family: -apple-system, BlinkMacSystemFont, system-ui, Roboto, Arial, sans-serif;
@@ -159,6 +183,32 @@ export default defineComponent({
 
         // Month labels
         h('g', { class: 'label' }, monthLabels.value.map(({ text, ...props }) => h('text', props, text))),
+
+        // Legend
+        (props.heatmap && h('g', { transform: `translate(${gridWidth.value - legendWidth.value}, ${gridHeight.value + legendGutter.value})` }, [
+          h(
+            'text',
+            {
+              'class': 'label',
+              'y': props.labelSize,
+              'dx': -props.cellGap * 2,
+              'text-anchor': 'end',
+            },
+            'Less',
+          ),
+
+          legendCells.value.map((props) => h('rect', props)),
+
+          h(
+            'text',
+            {
+              class: 'label',
+              y: props.labelSize,
+              dx: legendWidth.value - (props.cellSize + props.cellGap) + props.cellGap,
+            },
+            'More',
+          ),
+        ])),
       ],
     );
   },

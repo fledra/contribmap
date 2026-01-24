@@ -11,6 +11,8 @@ export interface ContribmapTheme {
   };
 }
 
+export type ContribmapThemeLevel = keyof ContribmapTheme['levels'];
+
 const themes: Record<string, ContribmapTheme> = {
   'light': {
     name: 'contribmap Light',
