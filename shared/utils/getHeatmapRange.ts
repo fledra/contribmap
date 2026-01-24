@@ -1,4 +1,4 @@
-import { DAYS_PER_WEEK, MS_PER_DAY } from './constants';
+import { DAYS_PER_WEEK, MS_PER_DAY } from './date';
 
 function getDateRange(from: number, to: number) {
   const daysBetween = Math.round((to - from) / MS_PER_DAY);
@@ -42,3 +42,5 @@ export function getHeatmapRange(from: number | Date, to: number | Date, alignSun
     utc: utcRange,
   };
 }
+
+export type HeatmapRange = ReturnType<typeof getHeatmapRange>;
