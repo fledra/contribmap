@@ -23,6 +23,19 @@ export default defineNuxtConfig({
     '../contribmap.config.yaml',
     '../contribmap.config.yml',
   ],
+  nitro: {
+    storage: {
+      heatmap: {
+        driver: 'memory',
+      },
+    },
+    devStorage: {
+      heatmap: {
+        driver: 'fs-lite',
+        base: './.cache/heatmaps',
+      },
+    },
+  },
   modules: ['@nuxt/eslint', '@nuxt/ui'],
   css: ['~/assets/styles/main.css'],
   eslint: {
