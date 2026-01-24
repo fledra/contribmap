@@ -14,7 +14,7 @@ export default defineComponent({
     cellRadius: { type: Number, default: 2 },
     labelSize: { type: Number, default: 8 },
     labelMargin: { type: Number, default: 4 },
-    labelColor: { type: String, default: 'oklch(92.2% 0 0)' },
+    theme: { type: String, default: 'dark' },
   },
   setup(props) {
     const range = computed(() => getHeatmapRange(props.from, props.to).localTime);
@@ -26,8 +26,33 @@ export default defineComponent({
     const gridHeight = computed(() => (DAYS_PER_WEEK * (props.cellSize + props.cellGap)) - props.cellGap);
     const viewBox = computed(() => `0 0 ${gridWidth.value + dayLabelGutter.value} ${gridHeight.value + monthLabelGutter.value}`);
 
-    function getCellColor(index: number) {
-      return `oklch(0.7 0.13 ${index % 360})`;
+    const theme = computed(() => getTheme(props.theme));
+    const themeLevelThresholds = computed(() => {
+      const contributions = props.heatmap ? Object.values(props.heatmap.contributions).map((c) => c.count) : [0];
+      const max = Math.max(...contributions);
+      return [
+        Math.floor(max * 0.2),
+        Math.floor(max * 0.4),
+        Math.floor(max * 0.6),
+        Math.floor(max * 0.8),
+      ] as const;
+    });
+
+    function getCellColorLevel(index: number) {
+      if (!props.heatmap) {
+        return 1337; // party mode!
+      }
+
+      const contribution = Object.values(props.heatmap.contributions)[index];
+      const count = contribution?.count ?? 0;
+      const [q1, q2, q3, q4] = themeLevelThresholds.value;
+
+      if (count === 0) return 0;
+      if (count <= q1) return 1;
+      if (count <= q2) return 2;
+      if (count <= q3) return 3;
+      if (count <= q4) return 4;
+      return 5;
     }
 
     const gridCells = computed(() => {
@@ -37,6 +62,9 @@ export default defineComponent({
         const row = i % DAYS_PER_WEEK;
         const col = Math.floor(i / DAYS_PER_WEEK);
 
+        const colorLevel = getCellColorLevel(i);
+        const color = colorLevel === 1337 ? { fill: `oklch(0.7 0.13 ${i % 360})` } : { class: `level-${colorLevel}` };
+
         cells.push({
           key: `cell-${i}`,
           x: dayLabelGutter.value + (col * (props.cellSize + props.cellGap)),
@@ -45,7 +73,7 @@ export default defineComponent({
           ry: props.cellRadius,
           width: props.cellSize,
           height: props.cellSize,
-          fill: getCellColor(i),
+          ...color,
         });
       }
 
@@ -101,6 +129,18 @@ export default defineComponent({
       return labels;
     });
 
+    const classes = computed(() => `
+      * {
+        font-family: -apple-system, BlinkMacSystemFont, system-ui, Roboto, Arial, sans-serif;
+      }
+
+      ${Object.entries(theme.value.levels).map(([level, color]) => `.level-${level} { fill: ${color} }`).join('')}
+
+      .label {
+        fill: ${theme.value.labelColor};
+      }
+    `);
+
     return () => h(
       'svg',
       {
@@ -109,14 +149,17 @@ export default defineComponent({
         xmlns: 'http://www.w3.org/2000/svg',
       },
       [
+        // SVG styles
+        h('style', classes.value),
+
         // Grid cells
         h('g', gridCells.value.map((props) => h('rect', props))),
 
         // Day labels
-        h('g', { fill: 'white' }, dayLabels.value.map(({ text, ...props }) => h('text', props, text))),
+        h('g', { class: 'label' }, dayLabels.value.map(({ text, ...props }) => h('text', props, text))),
 
         // Month labels
-        h('g', { fill: 'white' }, monthLabels.value.map(({ text, ...props }) => h('text', props, text))),
+        h('g', { class: 'label' }, monthLabels.value.map(({ text, ...props }) => h('text', props, text))),
       ],
     );
   },
