@@ -93,7 +93,6 @@ export default defineComponent({
           'text': getDayName(date),
           'x': dayLabelGutter.value - props.labelMargin,
           'y': row + (props.cellSize / 2) + (props.labelSize / 3),
-          'font-size': props.labelSize,
           'text-anchor': 'end',
         });
       }
@@ -116,10 +115,9 @@ export default defineComponent({
 
         if (weekIndex >= 0 && currentMonth !== month) {
           labels.push({
-            'text': getMonthName(date),
-            'x': dayLabelGutter.value + i * (props.cellSize + props.cellGap),
-            'y': monthLabelGutter.value - props.labelMargin,
-            'font-size': props.labelSize,
+            text: getMonthName(date),
+            x: dayLabelGutter.value + i * (props.cellSize + props.cellGap),
+            y: monthLabelGutter.value - props.labelMargin,
           });
 
           currentMonth = month;
@@ -137,6 +135,7 @@ export default defineComponent({
       ${Object.entries(theme.value.levels).map(([level, color]) => `.level-${level} { fill: ${color} }`).join('')}
 
       .label {
+        font-size: ${props.labelSize}px;
         fill: ${theme.value.labelColor};
       }
     `);
