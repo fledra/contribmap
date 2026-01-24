@@ -12,8 +12,6 @@ export default defineEventHandler(async (event) => {
 
   const query = getQuery(event);
   const profile = query.profile?.toString() || 'default';
-  const fromDate = query.from?.toString();
-  const toDate = query.to?.toString();
 
   if (!config) {
     throw createError({
@@ -44,7 +42,7 @@ export default defineEventHandler(async (event) => {
     contributions: res.status === 'rejected' ? [] : res.value,
   }));
 
-  const aggregated = aggregateContributions(fetchResults, fromDate, toDate);
+  const aggregated = aggregateContributions(fetchResults);
 
   const app = createSSRApp(Heatmap, {
     heatmap: aggregated,

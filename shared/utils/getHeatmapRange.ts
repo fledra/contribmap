@@ -1,4 +1,4 @@
-import { DAYS_PER_WEEK, MS_PER_DAY } from './date';
+import { DAYS_PER_WEEK, DAYS_PER_YEAR, MS_PER_DAY } from './date';
 
 function getDateRange(from: number, to: number) {
   const daysBetween = Math.round((to - from) / MS_PER_DAY);
@@ -11,13 +11,12 @@ function getDateRange(from: number, to: number) {
   };
 }
 
-export function getHeatmapRange(from: number | Date, to: number | Date, alignSunday = true) {
-  let fromDate = new Date(from);
-  let toDate = new Date(to);
+export function getHeatmapRange(from?: string | number | Date, to?: string | number | Date, alignSunday = true) {
+  let toDate = new Date(to ?? Date.now());
+  let fromDate = new Date(from ?? new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate() - DAYS_PER_YEAR));
 
   if (fromDate > toDate) {
-    fromDate = new Date(to);
-    toDate = new Date(from);
+    [fromDate, toDate] = [toDate, fromDate];
   }
 
   if (alignSunday) {

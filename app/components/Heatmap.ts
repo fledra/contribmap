@@ -17,9 +17,7 @@ export default defineComponent({
     labelColor: { type: String, default: 'oklch(92.2% 0 0)' },
   },
   setup(props) {
-    const toDate = computed(() => new Date(props.to));
-    const fromDate = computed(() => props.from ? new Date(props.from) : new Date(toDate.value.getFullYear(), toDate.value.getMonth(), toDate.value.getDate() - DAYS_PER_YEAR));
-    const range = computed(() => getHeatmapRange(fromDate.value, toDate.value).localTime);
+    const range = computed(() => getHeatmapRange(props.from, props.to).localTime);
 
     const dayLabelGutter = computed(() => props.labelSize * 2.8);
     const monthLabelGutter = computed(() => props.labelSize * 1.5);
