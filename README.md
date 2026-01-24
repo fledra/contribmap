@@ -38,7 +38,7 @@ The configuration is an object where each key is a _Profile Name_. Each profile 
 
 A basic configuration would look like this:
 
-```json
+```jsonc
 // contribmap.config.json
 
 {
@@ -79,7 +79,7 @@ default:
 
 You can define multiple profiles in your configuration:
 
-```json
+```jsonc
 // contribmap.config.json
 
 {
