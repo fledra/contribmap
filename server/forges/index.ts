@@ -1,5 +1,3 @@
-import type { ContributionFetcher } from '../types/contribution';
-
 import { fetchCodeberg } from './codeberg';
 import { fetchForgejo } from './forgejo';
 import { fetchGithub } from './github';

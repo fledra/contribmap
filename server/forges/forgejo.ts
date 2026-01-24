@@ -1,11 +1,9 @@
-import type { Contribution, ContributionFetcher } from '../types/contribution';
-
 interface ForgejoResponse {
   timestamp: number;
   contributions: number;
 }
 
-export const fetchForgejo: ContributionFetcher = async (config) => {
+export const fetchForgejo: ContributionFetcher = async (config, options) => {
   if (!config.baseURL) {
     throw new Error(`Could not find baseURL for ${config.forge}.${config.username}`);
   }
@@ -26,10 +24,18 @@ export const fetchForgejo: ContributionFetcher = async (config) => {
     },
   });
 
-  const contributions = response.map<Contribution>((day) => ({
-    date: getISODate(day.timestamp * 1000),
-    count: day.contributions,
-  }));
+  const from = +new Date(options.from);
+  const to = +new Date(options.to);
+
+  const contributions = response
+    .filter((day) => {
+      const ts = day.timestamp * 1000;
+      return ts >= from && ts <= to;
+    })
+    .map<Contribution>((day) => ({
+      date: getISODate(day.timestamp * 1000),
+      count: day.contributions,
+    }));
 
   return contributions;
 };

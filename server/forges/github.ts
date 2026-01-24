@@ -1,6 +1,4 @@
-import type { Contribution, ContributionFetcher } from '../types/contribution';
-
-export interface GithubResponse {
+interface GithubResponse {
   data: {
     user: {
       contributionsCollection: {
@@ -10,16 +8,16 @@ export interface GithubResponse {
   };
 }
 
-export interface GithubContributionCalendar {
+interface GithubContributionCalendar {
   totalContributions: number;
   weeks: GithubContributionWeek[];
 }
 
-export interface GithubContributionWeek {
+interface GithubContributionWeek {
   contributionDays: GithubContributionDay[];
 }
 
-export interface GithubContributionDay {
+interface GithubContributionDay {
   date: string;
   contributionCount: number;
   contributionLevel: string;
@@ -27,9 +25,9 @@ export interface GithubContributionDay {
 
 const BASE_URL = 'https://api.github.com/graphql';
 const query = `
-  query ContributionCalendar($username: String!) {
+  query ContributionCalendar($username: String!, $from: DateTime!, $to: DateTime!) {
     user(login: $username) {
-      contributionsCollection {
+      contributionsCollection(from: $from, to: $to) {
         contributionCalendar {
           totalContributions
           weeks {
@@ -45,7 +43,7 @@ const query = `
   }
 `;
 
-export const fetchGithub: ContributionFetcher = async (config) => {
+export const fetchGithub: ContributionFetcher = async (config, options) => {
   let token: string | undefined;
 
   if (config.token) {
@@ -59,7 +57,11 @@ export const fetchGithub: ContributionFetcher = async (config) => {
     },
     body: {
       query,
-      variables: { username: config.username },
+      variables: {
+        username: config.username,
+        from: new Date(options.from).toISOString(),
+        to: new Date(options.to).toISOString(),
+      },
     },
   });
 

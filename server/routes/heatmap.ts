@@ -1,5 +1,3 @@
-import type { ContributionFetchResult } from '../types/contribution';
-
 import { createSSRApp } from 'vue';
 import { renderToString } from 'vue/server-renderer';
 
@@ -12,6 +10,10 @@ export default defineEventHandler(async (event) => {
 
   const query = getQuery(event);
   const profile = query.profile?.toString() || 'default';
+  const from = query.from?.toString();
+  const to = query.to?.toString();
+
+  const range = getHeatmapRange(from, to, !from && !to).utc;
 
   if (!config) {
     throw createError({
@@ -32,21 +34,28 @@ export default defineEventHandler(async (event) => {
   const sources = config[profile];
   const promises = sources.map((source) => {
     const fetcher = getForgeFetcher(source.forge);
-    return fetcher(source);
+    return fetcher(source, range);
   });
 
   const promiseResults = await Promise.allSettled(promises);
-  const fetchResults = promiseResults.map<ContributionFetchResult>((res, i) => ({
+  const fetchResults = promiseResults.map<ContributionFetcherResult>((res, i) => ({
     forge: sources[i].forge,
     status: res.status,
     contributions: res.status === 'rejected' ? [] : res.value,
   }));
 
-  const aggregated = aggregateContributions(fetchResults);
+  const { aggregated, total } = aggregateContributions(fetchResults);
 
+  const heatmap: HeatmapData = {
+    profile,
+    contributions: aggregated,
+    totalContributions: total,
+  };
+
+  const theme = query.theme?.toString() || 'dark';
   const app = createSSRApp(Heatmap, {
-    heatmap: aggregated,
-    labelColor: 'oklch(20.5% 0 0)',
+    heatmap,
+    theme,
   });
 
   setResponseHeader(event, 'Content-Type', 'image/svg+xml');

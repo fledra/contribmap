@@ -21,7 +21,7 @@ export function getLastSunday(date: Date) {
 }
 
 export function getISODate(date?: number | string | Date) {
-  return new Date(date ?? Date.now()).toISOString().split('T').at(0);
+  return new Date(date ?? Date.now()).toISOString().split('T').at(0) as string;
 }
 
 export function getDayName(date: Date, locale: Intl.LocalesArgument = 'default') {

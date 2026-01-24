@@ -1,19 +1,8 @@
-import type { ContributionFetchResult } from '../types/contribution';
-
-export default function aggregateContributions(
-  results: ContributionFetchResult | ContributionFetchResult[],
-  from?: string | number | Date,
-  to: string | number | Date = new Date(),
-) {
+export default function aggregateContributions(results: ContributionFetcherResult | ContributionFetcherResult[]) {
   const fetchedResults = Array.isArray(results) ? results : [results];
 
-  const toDate = new Date(to);
-  const toISO = getISODate(toDate);
-
-  const fromDate = from ? new Date(from) : new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate() - DAYS_PER_YEAR);
-  const fromISO = getISODate(fromDate);
-
-  const heatmap: HeatmapData = {};
+  const aggregated: AggregatedContributions = {};
+  let total = 0;
 
   for (const result of fetchedResults) {
     if (result.status === 'rejected') continue;
@@ -23,19 +12,21 @@ export default function aggregateContributions(
     for (const contribution of contributions) {
       const { date, count } = contribution;
 
-      if (date < fromISO || date > toISO) continue;
-
-      if (!heatmap[date]) {
-        heatmap[date] = {
-          total: 0,
+      if (!aggregated[date]) {
+        aggregated[date] = {
+          count: 0,
           breakdown: {},
         };
       }
 
-      heatmap[date].total += count;
-      heatmap[date].breakdown[forge] = (heatmap[date].breakdown[forge] ?? 0) + count;
+      total += count;
+      aggregated[date].count += count;
+      aggregated[date].breakdown[forge] = (aggregated[date].breakdown[forge] ?? 0) + count;
     }
   }
 
-  return heatmap;
+  return {
+    total,
+    aggregated,
+  };
 }
