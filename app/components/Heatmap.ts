@@ -1,10 +1,7 @@
 import { computed, defineComponent, h, type SVGAttributes, type VNodeProps } from 'vue';
 
-const dayNames = ['Mon', 'Wed', 'Fri'] as const;
-const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
-const maxDayNameLength = dayNames.reduce((acc, cur) => Math.max(acc, cur.length), 0);
-
-const CHAR_WIDTH_RATIO = 0.65;
+type HeatmapElement = VNodeProps & SVGAttributes;
+type HeatmapLabel = HeatmapElement & { text: string };
 
 export default defineComponent({
   name: 'Heatmap',
@@ -15,7 +12,7 @@ export default defineComponent({
     cellSize: { type: Number, default: 10 },
     cellGap: { type: Number, default: 2 },
     cellRadius: { type: Number, default: 2 },
-    labelFontSize: { type: Number, default: 8 },
+    labelSize: { type: Number, default: 8 },
     labelMargin: { type: Number, default: 4 },
     labelColor: { type: String, default: 'oklch(92.2% 0 0)' },
   },
@@ -24,79 +21,87 @@ export default defineComponent({
     const fromDate = computed(() => props.from ? new Date(props.from) : new Date(toDate.value.getFullYear(), toDate.value.getMonth(), toDate.value.getDate() - DAYS_PER_YEAR));
     const range = computed(() => getHeatmapRange(fromDate.value, toDate.value).localTime);
 
-    const xAxisGutter = computed(() => props.labelFontSize + props.labelMargin * 2);
-    const yAxisGutter = computed(() => props.labelMargin + maxDayNameLength * props.labelFontSize * CHAR_WIDTH_RATIO);
+    const dayLabelGutter = computed(() => props.labelSize * 2.8);
+    const monthLabelGutter = computed(() => props.labelSize * 1.5);
 
-    const gridWidth = computed(() => (props.cellSize * range.value.weeksBetween) + (props.cellGap * (range.value.weeksBetween - 1)));
-    const gridHeight = computed(() => (props.cellSize * DAYS_PER_WEEK) + (props.cellGap * (DAYS_PER_WEEK - 1)));
-    const viewBox = computed(() => `0 0 ${gridWidth.value + yAxisGutter.value} ${gridHeight.value + xAxisGutter.value}`);
+    const gridWidth = computed(() => (range.value.weeksBetween * (props.cellSize + props.cellGap)) - props.cellGap);
+    const gridHeight = computed(() => (DAYS_PER_WEEK * (props.cellSize + props.cellGap)) - props.cellGap);
+    const viewBox = computed(() => `0 0 ${gridWidth.value + dayLabelGutter.value} ${gridHeight.value + monthLabelGutter.value}`);
 
-    const labelStyles = computed<SVGAttributes['style']>(() => ({
-      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif',
-      fontSize: props.labelFontSize,
-      fill: props.labelColor,
-    }));
+    function getCellColor(index: number) {
+      return `oklch(0.7 0.13 ${index % 360})`;
+    }
 
-    const monthLabels = computed(() => {
-      const labels: Array<[string, number]> = [];
+    const gridCells = computed(() => {
+      const cells: HeatmapElement[] = [];
 
-      const from = new Date(range.value.from);
-      const to = new Date(range.value.to);
-      const firstDay = new Date(from.getFullYear(), from.getMonth(), from.getDate() - from.getDay());
-      let cursor = new Date(from.getFullYear(), from.getMonth(), 1);
+      for (let i = 0; i < range.value.daysBetween; i++) {
+        const row = i % DAYS_PER_WEEK;
+        const col = Math.floor(i / DAYS_PER_WEEK);
 
-      while (cursor <= to) {
-        const firstDayOfMonth = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
-        const weekIndex = Math.floor(getDaysBetween(firstDayOfMonth, firstDay) / DAYS_PER_WEEK);
-        const month = monthNames[firstDayOfMonth.getMonth()];
+        cells.push({
+          key: `cell-${i}`,
+          x: dayLabelGutter.value + (col * (props.cellSize + props.cellGap)),
+          y: monthLabelGutter.value + (row * (props.cellSize + props.cellGap)),
+          rx: props.cellRadius,
+          ry: props.cellRadius,
+          width: props.cellSize,
+          height: props.cellSize,
+          fill: getCellColor(i),
+        });
+      }
 
-        if (month && weekIndex >= 0 && weekIndex <= range.value.weeksBetween) {
-          labels.push([month, weekIndex]);
-        }
+      return cells;
+    });
 
-        cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+    const dayLabels = computed(() => {
+      const labels: HeatmapLabel[] = [];
+
+      // Day indexes of Monday, Wednesday and Friday
+      for (const dayIndex of [1, 3, 5]) {
+        const row = monthLabelGutter.value + (dayIndex * (props.cellSize + props.cellGap));
+        const date = new Date();
+        date.setDate(date.getDate() - date.getDay() + dayIndex);
+
+        labels.push({
+          'text': getDayName(date),
+          'x': dayLabelGutter.value - props.labelMargin,
+          'y': row + (props.cellSize / 2) + (props.labelSize / 3),
+          'font-size': props.labelSize,
+          'text-anchor': 'end',
+        });
       }
 
       return labels;
     });
 
-    function getCellX(index: number) {
-      const col = Math.floor(index / DAYS_PER_WEEK);
-      return col * (props.cellSize + props.cellGap) + yAxisGutter.value;
-    }
+    const monthLabels = computed(() => {
+      const labels: HeatmapLabel[] = [];
+      const startDate = new Date(range.value.from);
 
-    function getCellY(index: number) {
-      const row = index % DAYS_PER_WEEK;
-      return row * (props.cellSize + props.cellGap) + xAxisGutter.value;
-    }
+      let currentMonth = -1;
 
-    function getDayLabelProps(index: number): VNodeProps & SVGAttributes {
-      const row = (index * 2) + 1;
-      const rowY = getCellY(row);
+      for (let i = 0; i < range.value.weeksBetween; i++) {
+        const date = new Date(range.value.from + (i * 7 * MS_PER_DAY));
+        const month = date.getMonth();
 
-      return {
-        'key': `day-${index}`,
-        'x': yAxisGutter.value - props.labelMargin,
-        'y': rowY + props.cellSize / 2,
-        'text-anchor': 'end',
-        'dominant-baseline': 'middle',
-      };
-    }
+        const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+        const weekIndex = Math.floor(getDaysBetween(firstDayOfMonth, startDate) / DAYS_PER_WEEK);
 
-    function getMonthLabelProps(weekIndex: number): VNodeProps & SVGAttributes {
-      const colX = getCellX((weekIndex + 1) * DAYS_PER_WEEK);
+        if (weekIndex >= 0 && currentMonth !== month) {
+          labels.push({
+            'text': getMonthName(date),
+            'x': dayLabelGutter.value + i * (props.cellSize + props.cellGap),
+            'y': monthLabelGutter.value - props.labelMargin,
+            'font-size': props.labelSize,
+          });
 
-      return {
-        'key': `month-${weekIndex}`,
-        'x': colX - props.cellGap / 2,
-        'y': props.labelMargin,
-        'dominant-baseline': 'hanging',
-      };
-    }
+          currentMonth = month;
+        }
+      }
 
-    function getCellColor(index: number) {
-      return `oklch(0.7 0.13 ${index % 360})`;
-    }
+      return labels;
+    });
 
     return () => h(
       'svg',
@@ -107,25 +112,13 @@ export default defineComponent({
       },
       [
         // Grid cells
-        h('g', Array.from(
-          { length: range.value.daysBetween },
-          (_, i) => h('rect', {
-            key: `cell-${i}`,
-            x: getCellX(i),
-            y: getCellY(i),
-            fill: getCellColor(i),
-            rx: props.cellRadius,
-            ry: props.cellRadius,
-            width: props.cellSize,
-            height: props.cellSize,
-          }),
-        )),
+        h('g', gridCells.value.map((props) => h('rect', props))),
 
-        // Labels
-        h('g', { style: labelStyles.value }, [
-          dayNames.map((day, i) => h('text', getDayLabelProps(i), day)),
-          monthLabels.value.map(([month, i]) => h('text', getMonthLabelProps(i), month)),
-        ]),
+        // Day labels
+        h('g', { fill: 'white' }, dayLabels.value.map(({ text, ...props }) => h('text', props, text))),
+
+        // Month labels
+        h('g', { fill: 'white' }, monthLabels.value.map(({ text, ...props }) => h('text', props, text))),
       ],
     );
   },
