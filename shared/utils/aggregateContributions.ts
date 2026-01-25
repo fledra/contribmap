@@ -1,3 +1,5 @@
+import type { AggregatedContributions, ContributionFetcherResult } from '../types/heatmap';
+
 export default function aggregateContributions(results: ContributionFetcherResult | ContributionFetcherResult[]) {
   const fetchedResults = Array.isArray(results) ? results : [results];
 
