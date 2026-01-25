@@ -155,13 +155,10 @@ export default defineComponent({
     const legendWidth = computed(() => (legendCells.value.length + 1) * (props.cellSize + props.cellGap));
 
     const classes = computed(() => `
-      * {
-        font-family: -apple-system, BlinkMacSystemFont, system-ui, Roboto, Arial, sans-serif;
-      }
-
       ${Object.entries(theme.value.levels).map(([level, color]) => `.level-${level} { fill: ${color} }`).join('')}
 
       .label {
+        font-family: -apple-system, BlinkMacSystemFont, system-ui, Roboto, Arial, sans-serif;
         font-size: ${props.labelSize}px;
         fill: ${theme.value.labelColor};
       }
