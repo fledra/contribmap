@@ -5,6 +5,11 @@
     "forge": {
       "type": "object",
       "properties": {
+        "name": {
+          "type": "string",
+          "description": "Optional display name to differentiate instances",
+          "examples": ["Personal GitHub", "Work GitLab"]
+        },
         "forge": {
           "enum": ["github", "gitlab", "gitlab-self", "codeberg", "forgejo", "gitea"],
           "description": "The git service provider"

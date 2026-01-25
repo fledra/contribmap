@@ -29,12 +29,13 @@ Whether you use a file or the `CONTRIBMAP_SOURCES` environment variable, the dat
 
 The configuration is an object where each key is a _Profile Name_. Each profile contains an array of _Sources_.
 
-| Field    | Type   | Description                                                             |
-| -------- | ------ | ----------------------------------------------------------------------- |
-| type     | string | `github`, `gitlab`, `gitlab-self`, `codeberg`, `forgejo`, or `gitea`    |
-| username | string | Your username on the platform.                                          |
-| token    | string | The name of the environment variable that is holding your API token     |
-| baseUrl  | string | Required for self-hosted instances (e.g. <https://git.yourdomain.com>). |
+| Field    | Type    | Description                                                             |
+| -------- | ------- | ----------------------------------------------------------------------- |
+| name     | string? | Optional display name to differentiate instances                        |
+| forge    | string  | `github`, `gitlab`, `gitlab-self`, `codeberg`, `forgejo`, or `gitea`    |
+| username | string  | Your username on the platform                                           |
+| token    | string  | The name of the environment variable that is holding your API token     |
+| baseUrl  | string  | Required for self-hosted instances (e.g. <https://git.yourdomain.com>)  |
 
 A basic configuration would look like this:
 

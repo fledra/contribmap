@@ -7,7 +7,8 @@ export default function aggregateContributions(results: ContributionFetcherResul
   for (const result of fetchedResults) {
     if (result.status === 'rejected') continue;
 
-    const { forge, contributions } = result;
+    const { name, forge, username, contributions } = result;
+    const key = name ?? `${forge}:${username}`;
 
     for (const contribution of contributions) {
       const { date, count } = contribution;
@@ -21,7 +22,7 @@ export default function aggregateContributions(results: ContributionFetcherResul
 
       total += count;
       aggregated[date].count += count;
-      aggregated[date].breakdown[forge] = (aggregated[date].breakdown[forge] ?? 0) + count;
+      aggregated[date].breakdown[key] = (aggregated[date].breakdown[key] ?? 0) + count;
     }
   }
 

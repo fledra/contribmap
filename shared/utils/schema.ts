@@ -3,6 +3,10 @@ import z from 'zod';
 export const urlSchema = z.httpUrl({ normalize: true, error: 'Please enter a valid forge URL' }).optional();
 export const forgeSchema = z.strictObject({
   forge: z.enum(['github', 'gitlab', 'gitlab-self', 'codeberg', 'forgejo', 'gitea']),
+  name: z
+    .string()
+    .min(1, { error: 'Please enter a valid name' })
+    .optional(),
   username: z
     .string()
     .min(1, { error: 'Please enter a valid username' }),

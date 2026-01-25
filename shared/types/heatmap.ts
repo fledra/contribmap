@@ -13,14 +13,16 @@ export interface ContributionFetcherOptions {
 export type ContributionFetcher = (config: ForgeConfig, options: ContributionFetcherOptions) => Promise<Contribution[]>;
 
 export interface ContributionFetcherResult {
+  name?: string;
   forge: Forge;
+  username: string;
   status: PromiseSettledResult<ReturnType<ContributionFetcher>>['status'];
   contributions: Contribution[];
 }
 
 export interface HeatmapDay {
   count: number;
-  breakdown: Partial<{ [key in Forge]: number }>;
+  breakdown: { [key: string]: number };
 }
 
 export type AggregatedContributions = Record<string, HeatmapDay>;

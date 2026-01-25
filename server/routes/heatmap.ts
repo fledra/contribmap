@@ -55,7 +55,9 @@ export default defineEventHandler(async (event) => {
 
     const promiseResults = await Promise.allSettled(promises);
     const fetchResults = promiseResults.map<ContributionFetcherResult>((res, i) => ({
+      name: sources[i].name,
       forge: sources[i].forge,
+      username: sources[i].username,
       status: res.status,
       contributions: res.status === 'rejected' ? [] : res.value,
     }));
