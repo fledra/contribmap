@@ -25,14 +25,14 @@ export default defineNuxtConfig({
   ],
   nitro: {
     storage: {
-      heatmap: {
+      contributions: {
         driver: 'memory',
       },
     },
     devStorage: {
-      heatmap: {
+      contributions: {
         driver: 'fs-lite',
-        base: './.cache/heatmaps',
+        base: './.cache/contribution',
       },
     },
   },

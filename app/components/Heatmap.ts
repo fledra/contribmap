@@ -44,7 +44,10 @@ export default defineComponent({
         return 1337; // party mode!
       }
 
-      const contribution = Object.values(props.heatmap.contributions)[index];
+      const offset = (index + 1) * MS_PER_DAY;
+      const date = getISODate(range.value.from + offset);
+
+      const contribution = props.heatmap.contributions[date];
       const count = contribution?.count ?? 0;
       const [q1, q2, q3, q4] = themeLevelThresholds.value;
 

@@ -42,4 +42,5 @@ export function getHeatmapRange(from?: string | number | Date, to?: string | num
   };
 }
 
+export type HeatmapDateRange = ReturnType<typeof getDateRange>;
 export type HeatmapRange = ReturnType<typeof getHeatmapRange>;
