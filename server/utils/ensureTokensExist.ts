@@ -7,12 +7,21 @@ export default function checkTokensExist(config: ContribmapConfig) {
   for (const profileName of Object.keys(config)) {
     const profile = config[profileName];
 
+    if (!profile) {
+      continue;
+    }
+
     for (let i = 0; i < profile.length; i++) {
       const source = profile[i];
-      const { token } = source;
+      const { token: tokenName } = source ?? {};
 
-      if (token && !envKeys.includes(token)) {
-        invalidTokens.push(`  → ${token} (at ${profileName}[${i}].token)`);
+      if (!tokenName || !envKeys.includes(tokenName)) {
+        invalidTokens.push(`  → ${tokenName} (at ${profileName}[${i}].token)`);
+      } else {
+        const token = getToken(tokenName);
+        if (token.length === 0) {
+          invalidTokens.push(`  → ${tokenName} (at ${profileName}[${i}].token)`);
+        }
       }
     }
   }
