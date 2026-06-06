@@ -1,5 +1,3 @@
-import { logger } from 'nuxt/kit';
-
 import { getForgeFetcher } from '../forges';
 
 interface CachedContribution {
@@ -99,7 +97,7 @@ export default defineEventHandler(async (event) => {
       },
     };
   } catch (error) {
-    logger.error(error);
+    console.error(error);
 
     if (cached) {
       return cached;
