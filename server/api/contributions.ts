@@ -1,3 +1,5 @@
+import { logger } from 'nuxt/kit';
+
 import { getForgeFetcher } from '../forges';
 
 interface CachedContribution {
@@ -9,7 +11,7 @@ interface CachedContribution {
 }
 
 export default defineEventHandler(async (event) => {
-  const { config } = useContribmapConfig();
+  const { config } = useContribmapConfig(event);
 
   const query = getQuery(event);
   const profile = query.profile?.toString() || 'default';
@@ -57,15 +59,27 @@ export default defineEventHandler(async (event) => {
     });
 
     const promiseResults = await Promise.allSettled(promises);
-    const fetchResults = promiseResults.map<ContributionFetcherResult>((res, i) => ({
-      name: sources[i].name,
-      forge: sources[i].forge,
-      username: sources[i].username,
-      status: res.status,
-      contributions: res.status === 'rejected' ? [] : res.value.filter((c) => c.count > 0),
-    }));
+    const fetchResults: ContributionFetcherResult[] = [];
+    let total = 0;
 
-    const total = fetchResults.reduce((acc, cur) => acc + cur.contributions.reduce((a, c) => a + c.count, 0), 0);
+    for (const [i, res] of promiseResults.entries()) {
+      const src = sources.at(i);
+
+      if (!src || res.status === 'rejected') {
+        continue;
+      }
+
+      const result: ContributionFetcherResult = {
+        name: src.name,
+        forge: src.forge,
+        username: src.username,
+        status: res.status,
+        contributions: res.value.filter((c) => c.count > 0),
+      };
+
+      fetchResults.push(result);
+      total += result.contributions.reduce((a, c) => a + c.count, 0);
+    }
 
     const data: CachedContribution = {
       profile,
@@ -85,6 +99,8 @@ export default defineEventHandler(async (event) => {
       },
     };
   } catch (error) {
+    logger.error(error);
+
     if (cached) {
       return cached;
     }

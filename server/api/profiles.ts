@@ -1,11 +1,11 @@
-export default defineEventHandler(async () => {
-  const { config } = useContribmapConfig();
+export default defineEventHandler(async (event) => {
+  const { config } = useContribmapConfig(event);
 
   if (!config) {
     throw createError({
       statusCode: 500,
       statusText: 'Config Not Found',
-      message: 'Could not generate heatmap due to missing or invalid configuration',
+      message: 'Could not get profiles due to missing or invalid configuration',
     });
   }
 
