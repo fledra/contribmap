@@ -3,7 +3,7 @@
     <strong class="font-semibold">Aggregated Contributions</strong>
   </h2>
 
-  <Heatmap class="w-full h-full" :heatmap="contributions?.aggregated" />
+  <Heatmap class="w-full h-full" :heatmap="aggregated" />
 
   <h2 class="text-xl mb-2 text-primary-200">
     <strong class="font-semibold">Forge Breakdown</strong>
@@ -11,12 +11,12 @@
 
   <UAccordion
     :items="accordionItems"
-    :disabled="contributionsLoading"
+    :disabled="pending"
     :ui="{ label: 'text-lg font-light' }"
     type="multiple"
   >
-    <template #body="{ item }">
-      <Heatmap v-if="contributions && item.label" :heatmap="contributions.forges[item.label]" />
+    <template #content="{ index }">
+      <Heatmap v-if="contributions" :heatmap="contributions[index]" />
     </template>
   </UAccordion>
 </template>
@@ -25,57 +25,83 @@
 import type { AccordionItem } from '@nuxt/ui';
 
 const props = defineProps<{ profile: string }>();
+const { profile } = toRefs(props);
 
-const { data: contributionData, pending: contributionsLoading } = await useAsyncData(
-  'contributions',
-  (_, { signal }) => $fetch('/api/contributions', { signal, query: { profile: props.profile } }),
-  { watch: [() => props.profile] },
-);
+const { data, pending } = await useFetch('/api/contributions', { query: { profile } });
 
-const contributions = computed(() => {
-  if (!contributionData.value) return;
-
-  const forges: Record<string, HeatmapData> = {};
-
-  for (const forge of contributionData.value.contributions) {
-    const key = forge.name ?? `${forge.forge}:${forge.username}`;
-    const { aggregated, total } = aggregateContributions(forge);
-
-    forges[key] = {
-      profile: '',
-      contributions: aggregated,
-      totalContributions: total,
-    };
-  }
-
-  const { aggregated, total } = aggregateContributions(contributionData.value.contributions);
-  const merged: HeatmapData = {
+const aggregated = computed<HeatmapData | undefined>(() => {
+  if (!data.value) return;
+  const { aggregated, total } = aggregateContributions(data.value.contributions);
+  return {
     profile: '',
     contributions: aggregated,
     totalContributions: total,
   };
-
-  return {
-    forges,
-    aggregated: merged,
-  };
 });
 
-const accordionItems = computed(() => {
-  if (!contributions.value) {
+const forges: Record<Forge, AccordionItem> = {
+  'github': {
+    label: 'GitHub',
+    icon: 'lucide:github',
+    ui: { leadingIcon: 'text-default' },
+  },
+  'gitlab': {
+    label: 'GitLab',
+    icon: 'devicon:gitlab',
+  },
+  'gitlab-self': {
+    label: 'GitLab (self-hosted)',
+    icon: 'devicon:gitlab',
+  },
+  'codeberg': {
+    label: 'Codeberg',
+    icon: 'devicon:codeberg',
+  },
+  'forgejo': {
+    label: 'Forgejo',
+    icon: 'devicon:forgejo',
+  },
+  'gitea': {
+    label: 'Gitea',
+    icon: 'devicon:gitea',
+  },
+};
+
+const accordionItems = computed<AccordionItem[]>(() => {
+  if (!data.value) {
     return [];
   }
 
-  const keys = Object.keys(contributions.value.forges);
-  return keys.map<AccordionItem>((forge) => ({ label: forge }));
+  return data.value.contributions.map<AccordionItem>((forge) => {
+    const forgeItem = forges[forge.forge];
+    let label = forge.name ?? `${forge.forge}:${forge.username}`;
+
+    if (forgeItem.label) {
+      label = `${label} (${forgeItem.label})`;
+    }
+
+    return {
+      ...forgeItem,
+      label,
+    };
+  });
 });
 
-// const forges = [
-//   { label: 'GitHub', value: 'github', icon: 'lucide:github', ui: { itemLeadingIcon: 'text-default' } },
-//   { label: 'GitLab', value: 'gitlab', icon: 'devicon:gitlab' },
-//   { label: 'GitLab (self-hosted)', value: 'gitlab-self', icon: 'devicon:gitlab' },
-//   { label: 'Codeberg', value: 'codeberg', icon: 'devicon:codeberg' },
-//   { label: 'Forgejo', value: 'forgejo', icon: 'devicon:forgejo' },
-//   { label: 'Gitea', value: 'gitea', icon: 'devicon:gitea' },
-// ] as const satisfies SelectItem[];
+const contributions = computed(() => {
+  if (!data.value) return;
+
+  const forges: Array<HeatmapData & { forge: Forge }> = [];
+
+  for (const forge of data.value.contributions) {
+    const { aggregated, total } = aggregateContributions(forge);
+    forges.push({
+      profile: props.profile,
+      forge: forge.forge,
+      contributions: aggregated,
+      totalContributions: total,
+    });
+  }
+
+  return forges;
+});
 </script>

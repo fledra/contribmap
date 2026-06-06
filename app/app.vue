@@ -25,6 +25,8 @@
               class="w-42"
             />
           </div>
+
+          <ForgeBreakdown :profile="profile" />
         </div>
       </UContainer>
     </UMain>
@@ -32,6 +34,6 @@
 </template>
 
 <script setup lang="ts">
-const { data: profiles, pending: profilesLoading } = await useAsyncData('profiles', (_, { signal }) => $fetch('/api/profiles', { signal }));
+const { data: profiles, pending: profilesLoading } = await useFetch('/api/profiles');
 const profile = ref('default');
 </script>
