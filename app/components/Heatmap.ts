@@ -94,7 +94,7 @@ export default defineComponent({
         date.setDate(date.getDate() - date.getDay() + dayIndex);
 
         labels.push({
-          'text': getDayName(date),
+          'text': getDayName(date).slice(0, 3),
           'x': dayLabelGutter.value - props.labelMargin,
           'y': row + (props.cellSize / 2) + (props.labelSize / 3),
           'text-anchor': 'end',
@@ -119,7 +119,7 @@ export default defineComponent({
 
         if (weekIndex >= 0 && currentMonth !== month) {
           labels.push({
-            text: getMonthName(date),
+            text: getMonthName(date).slice(0, 3),
             x: dayLabelGutter.value + i * (props.cellSize + props.cellGap),
             y: monthLabelGutter.value - props.labelMargin,
           });
