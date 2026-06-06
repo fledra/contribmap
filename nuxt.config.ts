@@ -1,3 +1,5 @@
+import process from 'node:process';
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-12-04',
   devServer: {
@@ -35,6 +37,9 @@ export default defineNuxtConfig({
         base: './.cache/contribution',
       },
     },
+  },
+  runtimeConfig: {
+    CONTRIBMAP_CONFIG: process.env.CONTRIBMAP_CONFIG,
   },
   modules: ['@nuxt/eslint', '@nuxt/ui'],
   css: ['~/assets/styles/main.css'],
