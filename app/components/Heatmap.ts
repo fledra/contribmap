@@ -112,14 +112,19 @@ export default defineComponent({
 
       for (let i = 0; i < range.value.weeksBetween; i++) {
         const date = new Date(range.value.from + (i * 7 * MS_PER_DAY));
-        const month = date.getMonth();
+        const label = getMonthName(date).slice(0, 3);
 
+        if (labels.find((l) => l.text === label)) {
+          continue;
+        }
+
+        const month = date.getMonth();
         const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
         const weekIndex = Math.floor(getDaysBetween(firstDayOfMonth, startDate) / DAYS_PER_WEEK);
 
         if (weekIndex >= 0 && currentMonth !== month) {
           labels.push({
-            text: getMonthName(date).slice(0, 3),
+            text: label,
             x: dayLabelGutter.value + i * (props.cellSize + props.cellGap),
             y: monthLabelGutter.value - props.labelMargin,
           });
