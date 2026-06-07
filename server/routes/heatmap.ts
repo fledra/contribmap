@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   const profile = query.profile?.toString() || 'default';
   const theme = query.theme?.toString() || 'dark';
 
-  const { contributions } = await $fetch('/api/contributions', { query });
+  const { contributions, range } = await $fetch('/api/contributions', { query });
   const { aggregated, total } = aggregateContributions(contributions);
 
   const heatmap: HeatmapData = {
@@ -18,6 +18,8 @@ export default defineEventHandler(async (event) => {
   };
 
   const app = createSSRApp(Heatmap, {
+    from: range.from,
+    to: range.to,
     heatmap,
     theme,
   });

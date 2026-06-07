@@ -3,7 +3,12 @@
     <strong class="font-semibold">Aggregated Contributions</strong>
   </h2>
 
-  <Heatmap class="w-full h-full" :heatmap="aggregated" />
+  <Heatmap
+    class="w-full h-full"
+    :heatmap="aggregated"
+    :from="data?.range.from"
+    :to="data?.range.to"
+  />
 
   <h2 class="text-xl mb-2 text-primary-200">
     <strong class="font-semibold">Forge Breakdown</strong>
@@ -16,7 +21,12 @@
     type="multiple"
   >
     <template #content="{ index }">
-      <Heatmap v-if="contributions" :heatmap="contributions[index]" />
+      <Heatmap
+        v-if="contributions"
+        :heatmap="contributions[index]"
+        :from="data?.range.from"
+        :to="data?.range.to"
+      />
     </template>
   </UAccordion>
 </template>
