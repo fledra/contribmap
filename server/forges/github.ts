@@ -77,6 +77,7 @@ export const fetchGithub: ContributionFetcher = async (config, options) => {
     chunks.map((chunk) => $fetch<GithubResponse>(BASE_URL, {
       method: 'POST',
       headers: {
+        'User-Agent': 'contribmap',
         ...(token && { Authorization: `Bearer ${token}` }),
       },
       body: {
