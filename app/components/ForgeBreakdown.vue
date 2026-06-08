@@ -43,7 +43,7 @@ const aggregated = computed<HeatmapData | undefined>(() => {
   if (!data.value) return;
   const { aggregated, total } = aggregateContributions(data.value.contributions);
   return {
-    profile: '',
+    profile: profile.value,
     contributions: aggregated,
     totalContributions: total,
   };

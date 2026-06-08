@@ -17,7 +17,7 @@ export default defineComponent({
     theme: { type: String, default: 'dark' },
   },
   setup(props) {
-    const range = computed(() => getHeatmapRange(props.from, props.to).localTime);
+    const range = computed(() => getHeatmapRange(props.from, props.to));
 
     const dayLabelGutter = computed(() => props.labelSize * 2.8 + props.labelMargin);
     const monthLabelGutter = computed(() => props.labelSize * 1.5 + props.labelMargin);
@@ -44,7 +44,7 @@ export default defineComponent({
         return 1337; // party mode!
       }
 
-      const offset = (index + 1) * MS_PER_DAY;
+      const offset = index * MS_PER_DAY;
       const date = getISODate(range.value.from + offset);
 
       const contribution = props.heatmap.contributions[date];

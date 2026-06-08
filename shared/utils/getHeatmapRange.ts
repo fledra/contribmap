@@ -1,5 +1,3 @@
-import { DAYS_PER_WEEK, DAYS_PER_YEAR, MS_PER_DAY } from './date';
-
 function getDateRange(from: number, to: number) {
   const daysBetween = Math.round((to - from) / MS_PER_DAY);
 
@@ -13,33 +11,23 @@ function getDateRange(from: number, to: number) {
 
 export function getHeatmapRange(from?: string | number | Date, to?: string | number | Date, alignSunday = true) {
   let toDate = new Date(to ?? Date.now());
-  let fromDate = new Date(from ?? new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate() - DAYS_PER_YEAR));
+  let fromDate = new Date(from ?? Date.UTC(toDate.getUTCFullYear(), toDate.getUTCMonth(), toDate.getUTCDate() - DAYS_PER_YEAR));
+
+  toDate = new Date(Date.UTC(toDate.getUTCFullYear(), toDate.getUTCMonth(), toDate.getUTCDate()));
+  fromDate = new Date(Date.UTC(fromDate.getUTCFullYear(), fromDate.getUTCMonth(), fromDate.getUTCDate()));
 
   if (fromDate > toDate) {
     [fromDate, toDate] = [toDate, fromDate];
   }
 
   if (alignSunday) {
-    fromDate.setDate(fromDate.getDate() - fromDate.getDay());
+    fromDate.setUTCDate(fromDate.getUTCDate() - fromDate.getUTCDay());
   }
 
-  fromDate.setHours(0, 0, 0, 0);
-  toDate.setHours(0, 0, 0, 0);
+  fromDate.setUTCHours(0, 0, 0, 0);
+  toDate.setUTCHours(23, 59, 59, 999);
 
-  const localRange = getDateRange(
-    fromDate.getTime(),
-    toDate.getTime() + MS_PER_DAY, // current day inclusive
-  );
-
-  const utcRange = getDateRange(
-    Date.UTC(fromDate.getUTCFullYear(), fromDate.getUTCMonth(), fromDate.getUTCDate()),
-    Date.UTC(toDate.getUTCFullYear(), toDate.getUTCMonth(), toDate.getUTCDate()) + MS_PER_DAY, // current day inclusive
-  );
-
-  return {
-    localTime: localRange,
-    utc: utcRange,
-  };
+  return getDateRange(fromDate.getTime(), toDate.getTime());
 }
 
 export type HeatmapDateRange = ReturnType<typeof getDateRange>;

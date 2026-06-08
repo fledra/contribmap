@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
   const from = query.from?.toString();
   const to = query.to?.toString();
 
-  const range = getHeatmapRange(from, to, !from && !to).utc;
+  const range = getHeatmapRange(from, to, !from && !to);
 
   const storage = useStorage('contributions');
   const cached = await storage.getItem(profile) as CachedContribution;
